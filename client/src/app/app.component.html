@@ -1,0 +1,17 @@
+<select [(ngModel)]="selectedUserId" (change)="updateUser()">
+  <option
+    *ngFor="let user of users"
+    [value]="user.id"
+    [selected]="selectedUserId === user.id"
+  >
+    {{ user.name }}
+  </option>
+</select>
+<ng-container *ngIf="selectedItem?.has_collaborations">
+  Share selected item:
+  <app-contente-sharing [sharingItem]="selectedItem"></app-contente-sharing>
+</ng-container>
+<app-content-explorer
+  [token]="token$ | async"
+  (itemSelected)="onItemSelected($event)"
+></app-content-explorer>

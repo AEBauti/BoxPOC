@@ -1,0 +1,28 @@
+<select [(ngModel)]="permission">
+  <ng-container *ngIf="sharingItem.type === 'file'">
+    <option
+      [value]="permission.code"
+      *ngFor="let permission of filePermissions"
+    >
+      {{ permission.name }}
+    </option>
+  </ng-container>
+  <ng-container *ngIf="sharingItem.type === 'folder'">
+    <option
+      [value]="permission.code"
+      *ngFor="let permission of folderPermissions"
+    >
+      {{ permission.name }}
+    </option>
+  </ng-container>
+</select>
+
+<select [(ngModel)]="shareWith">
+  <option [value]="user.id" *ngFor="let user of users$ | async">
+    {{ user.name }}
+  </option>
+</select>
+
+For Days: <input [(ngModel)]="shareLength" />
+
+<button (click)="share()">Share {{ sharingItem.type }}</button>

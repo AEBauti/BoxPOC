@@ -1,0 +1,10 @@
+node_modules
+dist
+coverage
+.vscode
+e2e
+angular.json
+package.json
+package-lock.json
+README.md
+karma.conf.js
