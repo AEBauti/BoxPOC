@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Box.V2.Core" Version="3.26.0" />
+    <PackageReference Include="Box.V2.Core" Version="4.2.0" />
   </ItemGroup>
 
 

@@ -11,12 +11,12 @@ import { BoxService } from './services/box.service';
 export class AppComponent implements OnInit {
   public users = [
     {
-      name: 'User 1',
-      id: 'bdec861a-7fef-463d-a9aa-2652616958dd',
+      name: 'Project Owner',
+      id: 'a69f4d0f-fc71-47da-865f-5a97c2c421d6',
     },
     {
-      name: 'User 2',
-      id: '187bd69b-a2c4-4774-9612-f1452c5eefac',
+      name: 'Project Collaborator 1',
+      id: '11adfbd0-b6ac-4d07-a6e8-204eeb35d12b',
     },
   ];
   public selectedUserId: string;

@@ -7,7 +7,7 @@
     {{ user.name }}
   </option>
 </select>
-<ng-container *ngIf="selectedItem?.has_collaborations">
+<ng-container *ngIf="selectedItem">
   Share selected item:
   <app-contente-sharing [sharingItem]="selectedItem"></app-contente-sharing>
 </ng-container>

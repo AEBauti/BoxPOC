@@ -1,4 +1,5 @@
 ﻿using Box.V2;
+using Box.V2.Auth.Token;
 using Box.V2.Config;
 using Box.V2.JWTAuth;
 using Box.V2.Models;
@@ -27,7 +28,7 @@ namespace BoxDocumentPocApi.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var client = BuildBoxAdminClient();
+            var client = await BuildBoxAdminClient();
             var users = await client.UsersManager.GetEnterpriseUsersAsync(fields: new List<string>{ "name", "login", "notification_email", "external_app_user_id" });
 
             return Ok(users.Entries);
@@ -38,21 +39,34 @@ namespace BoxDocumentPocApi.Controllers
         {
             var config = new BoxConfig(_configuration.ClientId, _configuration.ClientSecret, _configuration.EnterpriseID, _configuration.AppAuth.PrivateKey, _configuration.AppAuth.Passphrase, _configuration.AppAuth.PublicKeyID);
             var sdk = new BoxJWTAuth(config);
-            var token = sdk.AdminToken();
+            var token = await sdk.AdminTokenAsync();
             var client = sdk.AdminClient(token);
 
             var users = await client.UsersManager.GetEnterpriseUsersAsync(externalAppUserId: userId.ToString());
-            if (users.TotalCount == 0)
+            BoxUser user;
+            if (users.TotalCount != 0)
             {
-                return NotFound();
+                user = users.Entries[0];
             }
+            else
+            {
+                var userRequest = new BoxUserRequest()
+                {
+                    Name = "Test Name",
+                    ExternalAppUserId = userId.ToString(),
+                    IsPlatformAccessOnly = true,
+                };
 
-            var user = users.Entries[0];
-            var userToken = sdk.UserToken(user.Id);
+                user = await client.UsersManager.CreateEnterpriseUserAsync(userRequest);
+            }
+            var userToken = await sdk.UserTokenAsync(user.Id);
+
+            var exchanger = new TokenExchange(userToken, new[] { "base_explorer", /*"item_download",*/ "item_delete", "item_upload" });
+            var downscopedToken = await exchanger.ExchangeAsync();
 
             var response = new TokenResponse
             {
-                Token = userToken,
+                Token = downscopedToken,
                 Expires = DateTime.UtcNow.AddMinutes(60),
                 Id = user.Id
             };
@@ -62,7 +76,8 @@ namespace BoxDocumentPocApi.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateUser(UserCreate model)
         {
-            var client = BuildBoxAdminClient();
+            var client = await BuildBoxAdminClient();
+
             var userId = model.UserId.ToString();
             var users = await client.UsersManager.GetEnterpriseUsersAsync(externalAppUserId: userId);
 
@@ -81,11 +96,11 @@ namespace BoxDocumentPocApi.Controllers
             return Ok(user);
         }
 
-        private BoxClient BuildBoxAdminClient()
+        private async Task<BoxClient> BuildBoxAdminClient()
         {
             var config = new BoxConfig(_configuration.ClientId, _configuration.ClientSecret, _configuration.EnterpriseID, _configuration.AppAuth.PrivateKey, _configuration.AppAuth.Passphrase, _configuration.AppAuth.PublicKeyID);
             var sdk = new BoxJWTAuth(config);
-            var token = sdk.AdminToken();
+            var token = await sdk.AdminTokenAsync();
             return sdk.AdminClient(token);
         }
     }
